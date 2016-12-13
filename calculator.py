@@ -14,7 +14,7 @@ def calculateFactorial(num):
 def calculateReciprocal(num):
     if num == 0:
         return 0
-    return 1/num
+    return 1.0/num
 
 def test_calculateFactorial():
     print("testing prettyNum(calculateFactorial(2))  = %s" % (calculateFactorial(2))) #2
@@ -41,6 +41,7 @@ def tokenizeInput(equation):
     equation = equation.replace('*', ' * ').replace('/', ' / ')
     equation = equation.replace('(', ' ( ').replace(')', ' ) ')
     equation = equation.replace('^', ' ^ ').replace('1/x', ' 1/x ')
+    equation = equation.replace('1 / X', ' 1/X ').replace('1/X', ' 1/X ').replace('1 / X', ' 1/X ')
     equation = equation.replace('!', '! ').replace('C', ' C ')
     equation = equation.replace('Q', ' Q ').replace('A', ' A ')
     equation = equation.split(' ')
@@ -63,6 +64,8 @@ def truncateEquation(splitEquation):
             #in the case of first item deleting we must test
             if len(truncatedEquation) > 0:
                 truncatedEquation.pop()
+        elif 'A' in part:#case A: drop all
+            truncatedEquation = []
         else:
             truncatedEquation.append(part)
     return truncatedEquation, False #continue execution
@@ -152,13 +155,33 @@ truncatedEquation, quit = truncateEquation(splitEquation)
 num_format = re.compile("-?\d+(?:\.\d+)?")
 
 currValue = 0
-for part in truncatedEquation:
-    isnumber = re.match(num_format,part)
-    if isnumber:
-
-        currValue += float(part)
+firstItem = True
+print(truncatedEquation)
+for index in range(0,len(truncatedEquation)):
+    part = truncatedEquation[index]
+    isnumber = re.match(num_format, part)
+    #case first item entered was a number
+    if firstItem and '-' in part:
+        print("firstItem is -")
+        currValue = -1
     else:
-        print(part)
+        if index > 2:
+            print(calculateReciprocal(float(truncatedEquation[index-2])))
+        #rest of the numbers and symbols
+        if '+' in part:
+            currValue += float(truncatedEquation[index-1]) + float(truncatedEquation[index+1])
+        elif '-' in part:
+            currValue += float(truncatedEquation[index-1]) - float(truncatedEquation[index+1])
+        elif '*' in part:
+            currValue += float(truncatedEquation[index-1]) * float(truncatedEquation[index+1])
+        elif '1/X' in part:
+            truncatedEquation[index] = calculateReciprocal(float(truncatedEquation[index-1]))
+        elif '/' in part:
+            currValue += float(truncatedEquation[index-1]) / float(truncatedEquation[index+1])
+        elif '!' in part:
+        #else:
+            #print(part)
+    firstItem = False
         #
 
 #step 4 display answer
