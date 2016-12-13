@@ -1,5 +1,34 @@
 import re
 
+#basic stack implementation
+class Stack:
+     def __init__(self):
+         self.items = []
+
+     def isEmpty(self):
+         return self.items == []
+
+     def push(self, item):
+         self.items.append(item)
+
+     def pop(self):
+         return self.items.pop()
+
+     def peek(self):
+         return self.items[len(self.items)-1]
+
+     def size(self):
+         return len(self.items)
+
+class Node:
+    def __init__(self, value):
+        self.value = value
+
+    def __init__(self, value, left, right):
+        self.value = value
+        self.left = left
+        self.right = right
+
 ####
 # Math Section
 ####
@@ -37,15 +66,14 @@ def test_calculateReciprocal():
 
 #takes in an equation string and puts spaces between all cared about operations
 def tokenizeInput(equation):
-    equation = equation.replace('+', ' + ').replace('-', ' - ')
-    equation = equation.replace('*', ' * ').replace('/', ' / ')
-    equation = equation.replace('(', ' ( ').replace(')', ' ) ')
-    equation = equation.replace('^', ' ^ ').replace('1/x', ' 1/x ')
-    equation = equation.replace('1 / X', ' 1/X ').replace('1/X', ' 1/X ').replace('1 / X', ' 1/X ')
-    equation = equation.replace('!', '! ').replace('C', ' C ')
-    equation = equation.replace('Q', ' Q ').replace('A', ' A ')
-    equation = equation.split(' ')
-    return equation
+    return (equation.replace('+', ' + ').replace('-', ' - ')
+                    .replace('*', ' * ').replace('/', ' / ')
+                    .replace('(', ' ( ').replace(')', ' ) ')
+                    .replace('^', ' ^ ').replace('1/x', ' 1/x ')
+                    .replace('1 / X', ' 1/X ').replace('1/X', ' 1/X ')
+                    .replace('1 / X', ' 1/X ').replace('!', '! ')
+                    .replace('C', ' C ').replace('Q', ' Q ').replace('A', ' A ')
+                    .split(' '))
 
 #takes the tokenized equation and truncates it down to just the parts
 #involved in the equation, gets rid of extra spaces
@@ -156,32 +184,54 @@ num_format = re.compile("-?\d+(?:\.\d+)?")
 
 currValue = 0
 firstItem = True
-
+equationStack = Stack()
+multiplyPass = []
 for index in range(0,len(truncatedEquation)):
     part = truncatedEquation[index]
     isnumber = re.match(num_format, part)
+    if isnumber:
+        equationStack.push(part)
+    else:
+        previousVal = equationStack.pop()
+
     #case first item entered was a number
     if firstItem and '-' in part:
         print("firstItem is -")
         currValue = -1
     else:
         #rest of the numbers and symbols
-        if '+' in part:
-            currValue += float(truncatedEquation[index-1]) + float(truncatedEquation[index+1])
-        elif '-' in part:
-            currValue += float(truncatedEquation[index-1]) - float(truncatedEquation[index+1])
-        elif '*' in part:
-            currValue += float(truncatedEquation[index-1]) * float(truncatedEquation[index+1])
+        if '*' in part:
+            truncatedEquation[index+1] = str(float(truncatedEquation[index-1]) * float(truncatedEquation[index+1]))
+            del truncatedEquation[index-1], truncatedEquation[index]
         elif '1/X' in part:
             truncatedEquation[index] = calculateReciprocal(float(truncatedEquation[index-1]))
         elif '/' in part:
-            currValue += float(truncatedEquation[index-1]) / float(truncatedEquation[index+1])
+            truncatedEquation[index+1] = float(truncatedEquation[index-1]) / float(truncatedEquation[index+1])
         elif '!' in part:
             currValue = currValue + calculateFactorial(int((truncatedEquation[index-1])[:-1]))
         #else:
             #print(part)
     firstItem = False
-        #
+
+#add pass
+firstItem = True
+for index in range(0,len(truncatedEquation)):
+    part = truncatedEquation[index]
+    isnumber = re.match(num_format, part)
+    #case first item entered was a number
+    if firstItem:
+        if '+' in part:
+            currValue += float(truncatedEquation[index+1])
+        elif '-' in part:
+            currValue += float(truncatedEquation[index+1])
+    else:
+        if '+' in part:
+            currValue += float(truncatedEquation[index-1]) + float(truncatedEquation[index+1])
+        elif '-' in part:
+            currValue += float(truncatedEquation[index-1]) - float(truncatedEquation[index+1])
+        #else:
+            #print(part)
+    firstItem = False
 
 #step 4 display answer
 
