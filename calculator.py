@@ -156,7 +156,7 @@ num_format = re.compile("-?\d+(?:\.\d+)?")
 
 currValue = 0
 firstItem = True
-print(truncatedEquation)
+
 for index in range(0,len(truncatedEquation)):
     part = truncatedEquation[index]
     isnumber = re.match(num_format, part)
@@ -165,8 +165,6 @@ for index in range(0,len(truncatedEquation)):
         print("firstItem is -")
         currValue = -1
     else:
-        if index > 2:
-            print(calculateReciprocal(float(truncatedEquation[index-2])))
         #rest of the numbers and symbols
         if '+' in part:
             currValue += float(truncatedEquation[index-1]) + float(truncatedEquation[index+1])
@@ -179,6 +177,7 @@ for index in range(0,len(truncatedEquation)):
         elif '/' in part:
             currValue += float(truncatedEquation[index-1]) / float(truncatedEquation[index+1])
         elif '!' in part:
+            currValue = currValue + calculateFactorial(int((truncatedEquation[index-1])[:-1]))
         #else:
             #print(part)
     firstItem = False
@@ -187,7 +186,6 @@ for index in range(0,len(truncatedEquation)):
 #step 4 display answer
 
 if quit != True:
-    print(truncatedEquation)
-    print(prettyNum(currValue))
+    print(truncatedEquation, prettyNum(currValue))
 else:
     print("we exited the program")
