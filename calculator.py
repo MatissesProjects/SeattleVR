@@ -180,20 +180,21 @@ truncatedEquation, quit = truncateEquation(splitEquation)
                     # (3+2)-
 #regex number finder,
   #negative optional, number, (with decimal number) optional
-num_format = re.compile("-?\d+(?:\.\d+)?")
+num_format = re.compile("-?\d+(?:\.\d+?)?")
 
 currValue = 0
 firstItem = True
-equationStack = Stack()
-multiplyPass = []
-for index in range(0,len(truncatedEquation)):
+#equationStack = Stack()
+#multiplyPass = []
+for index in range(0,len(truncatedEquation)-1):
     part = truncatedEquation[index]
     isnumber = re.match(num_format, part)
+    '''
     if isnumber:
         equationStack.push(part)
     else:
         previousVal = equationStack.pop()
-
+    '''
     #case first item entered was a number
     if firstItem and '-' in part:
         print("firstItem is -")
